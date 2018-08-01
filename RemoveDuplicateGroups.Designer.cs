@@ -188,7 +188,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txt_TenantId);
             this.Name = "RemoveDuplicateGroups";
-            this.Text = "Remove duplicate AAD groups";
+            this.Text = "Remove duplicate SCIM groups by externalId";
             this.ResumeLayout(false);
             this.PerformLayout();
 
