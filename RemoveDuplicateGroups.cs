@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -30,13 +27,20 @@ namespace Remove_duplicate_groups
 
         private async void btn_IdentityDuplicates_Click(object sender, EventArgs e)
         {
-            groups.Clear();
-            duplicateGroupIds.Clear();
-            var scimClient = CreateScimClient();
+            try
+            {
+                groups.Clear();
+                duplicateGroupIds.Clear();
+                var scimClient = CreateScimClient();
 
-            await Task.Run(() => FindDuplicateScimGroups(scimClient));
+                await Task.Run(() => FindDuplicateScimGroups(scimClient));
 
-            MessageBox.Show("Duplicate search completed", "Operation complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Duplicate search completed", "Operation complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Operation failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async Task FindDuplicateScimGroups(ScimClient scimClient)
@@ -59,7 +63,7 @@ namespace Remove_duplicate_groups
                 totalGroupCount += groupsPage.Resources.Count();                
                 startIndex += groupsPage.ItemsPerPage;
 
-                foreach(var group in groupsPage.Resources)
+                foreach(var group in groupsPage.Resources.Where(g => !string.IsNullOrEmpty(g.ExternalId)))
                 {
                     if(groups.ContainsKey(group.ExternalId))
                     {
@@ -88,21 +92,28 @@ namespace Remove_duplicate_groups
 
         private async void btn_Delete_Click(object sender, EventArgs e)
         {
-            var scimClient = CreateScimClient();
-
-            await Task.Run(async () => 
+            try
             {
-                var deleteCount = 0;
+                var scimClient = CreateScimClient();
 
-                foreach(var groupId in duplicateGroupIds)
+                await Task.Run(async () =>
                 {
-                    await scimClient.Delete<Collabco.Myday.Scim.v2.Model.ScimGroup2>(groupId);
-                    deleteCount++;
-                    UpdateDeleteCount(deleteCount);
-                }
-            });
+                    var deleteCount = 0;
 
-            MessageBox.Show("Delete duplicates completed", "Operation complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    foreach (var groupId in duplicateGroupIds)
+                    {
+                        await scimClient.Delete<Collabco.Myday.Scim.v2.Model.ScimGroup2>(groupId);
+                        deleteCount++;
+                        UpdateDeleteCount(deleteCount);
+                    }
+                });
+
+                MessageBox.Show("Delete duplicates completed", "Operation complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Operation failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void UpdateDeleteCount(int deleteCount)
