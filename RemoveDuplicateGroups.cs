@@ -55,8 +55,8 @@ namespace Remove_duplicate_groups
                     {
                         Attributes = new List<string> { "id", "externalId", "meta.created", "meta.lastModified" },
                         StartIndex = startIndex,
-                        SortBy = "meta.created",
-                        SortOrder = Collabco.Myday.Scim.Core.Model.SortOrder.Ascending
+                        //SortBy = "meta.created",
+                        //SortOrder = Collabco.Myday.Scim.Core.Model.SortOrder.Ascending
                     }
                 );
 
